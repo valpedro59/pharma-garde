@@ -54,12 +54,60 @@ export const rechercherParArrondissement = async (req, res) => {
         AND CURRENT_TIME BETWEEN h.heure_ouverture AND h.heure_fermeture
       WHERE p.arrondissement_id = $1
         AND (g.id IS NOT NULL OR h.id IS NOT NULL)
-      -- ORDER BY déterministe : une pharmacie en GARDE_* est toujours
-      -- affichée avant une simple OUVERTURE_NORMALE ('G' < 'O' en ASC)
       ORDER BY p.id, statut_actuel ASC;
     `;
 
     const { rows } = await query(queryText, [arrondissement_id]);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la recherche des pharmacies ouvertes." });
+  }
+};
+
+/**
+ * Rechercher les pharmacies ouvertes ou de garde sur TOUTE une Ville
+ * (jointure arrondissements -> ville, même logique garde/horaires que
+ * rechercherParArrondissement).
+ */
+export const rechercherParVille = async (req, res) => {
+  const { ville_id } = req.query;
+
+  if (!ville_id) {
+    return res
+      .status(400)
+      .json({ error: "Le paramètre ville_id est obligatoire." });
+  }
+
+  try {
+    const queryText = `
+      SELECT DISTINCT ON (p.id)
+        p.id, 
+        p.nom, 
+        p.telephone_1, 
+        p.telephone_2, 
+        p.adresse_textuelle,
+        ST_X(p.coordonnees::geometry) AS longitude,
+        ST_Y(p.coordonnees::geometry) AS latitude,
+        CASE 
+          WHEN g.id IS NOT NULL THEN 'GARDE_' || g.type_garde
+          ELSE 'OUVERTURE_NORMALE'
+        END AS statut_actuel
+      FROM pharmacies p
+      JOIN arrondissements a ON a.id = p.arrondissement_id
+      LEFT JOIN gardes g ON p.id = g.pharmacie_id 
+        AND NOW() BETWEEN g.date_debut AND g.date_fin
+      LEFT JOIN horaires_reguliers h ON p.id = h.pharmacie_id 
+        AND h.jour_semaine = EXTRACT(ISODOW FROM NOW()) % 7
+        AND CURRENT_TIME BETWEEN h.heure_ouverture AND h.heure_fermeture
+      WHERE a.ville_id = $1
+        AND (g.id IS NOT NULL OR h.id IS NOT NULL)
+      ORDER BY p.id, statut_actuel ASC;
+    `;
+
+    const { rows } = await query(queryText, [ville_id]);
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -101,14 +149,11 @@ export const rechercherProximite = async (req, res) => {
         WHERE 
           (g.id IS NOT NULL OR h.id IS NOT NULL)
           AND ST_DWithin(p.coordonnees, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, 10000)
-        -- ORDER BY déterministe : priorité à GARDE_* sur OUVERTURE_NORMALE
-        -- quand une pharmacie a les deux à la fois ('G' < 'O' en ASC)
         ORDER BY p.id, statut_actuel ASC
       ) AS resultats
       ORDER BY distance_metres ASC;
     `;
 
-    // Rappel : PostGIS prend l'ordre (Longitude, Latitude) -> ($1 = lon, $2 = lat)
     const { rows } = await query(queryText, [lon, lat]);
     res.json(rows);
   } catch (error) {

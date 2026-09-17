@@ -12,9 +12,12 @@ import {
 import {
   recupererGeographie,
   rechercherPharmaciesDeGarde,
+  rechercherPharmaciesParVille,
 } from "~/lib/pharmacies";
 import { ApiError } from "~/lib/api";
 import type { ZoneGeographique, PharmacieOuverte } from "~/lib/types";
+
+type Filtre = "arrondissement" | "ville";
 
 const SearchForm = () => {
   const [zones, setZones] = useState<ZoneGeographique[]>([]);
@@ -24,9 +27,24 @@ const SearchForm = () => {
   const [villeId, setVilleId] = useState<number | null>(null);
   const [arrondissementId, setArrondissementId] = useState<number | null>(null);
 
-  const [resultats, setResultats] = useState<PharmacieOuverte[] | null>(null);
-  const [chargementRecherche, setChargementRecherche] = useState(false);
-  const [erreurRecherche, setErreurRecherche] = useState<string | null>(null);
+  // Résultats "arrondissement" (recherche principale du formulaire)
+  const [resultatsArrondissement, setResultatsArrondissement] = useState<
+    PharmacieOuverte[] | null
+  >(null);
+  const [chargementArrondissement, setChargementArrondissement] =
+    useState(false);
+  const [erreurArrondissement, setErreurArrondissement] = useState<
+    string | null
+  >(null);
+
+  // Résultats "toute la ville" (chargés à la demande, mis en cache)
+  const [resultatsVille, setResultatsVille] = useState<
+    PharmacieOuverte[] | null
+  >(null);
+  const [chargementVille, setChargementVille] = useState(false);
+  const [erreurVille, setErreurVille] = useState<string | null>(null);
+
+  const [filtreActif, setFiltreActif] = useState<Filtre>("arrondissement");
 
   useEffect(() => {
     recupererGeographie()
@@ -46,8 +64,8 @@ const SearchForm = () => {
       .finally(() => setChargementZones(false));
   }, []);
 
-  // Dédoublonnage des villes (on évite `new Map` ici : ce nom est déjà pris
-  // par l'icône lucide `Map` importée juste au-dessus).
+  // Dédoublonnage des villes (pas de `new Map` ici : ce nom est déjà pris
+  // par l'icône lucide `Map` importée plus haut).
   const villes = zones.reduce<{ id: number; nom: string }[]>((acc, zone) => {
     if (!acc.some((v) => v.id === zone.ville_id)) {
       acc.push({ id: zone.ville_id, nom: zone.ville_nom });
@@ -59,37 +77,76 @@ const SearchForm = () => {
     (zone) => zone.ville_id === villeId && zone.arrondissement_id !== null,
   );
 
+  const villeSelectionnee = villes.find((v) => v.id === villeId);
+
   const gererChangementVille = (id: number) => {
     setVilleId(id);
     setArrondissementId(null);
-    setResultats(null);
+    // Un changement de ville invalide les deux jeux de résultats affichés.
+    setResultatsArrondissement(null);
+    setResultatsVille(null);
+    setFiltreActif("arrondissement");
   };
 
   const gererSoumission = async (evenement: FormEvent<HTMLFormElement>) => {
     evenement.preventDefault();
 
     if (!arrondissementId) {
-      setErreurRecherche("Sélectionnez un arrondissement.");
+      setErreurArrondissement("Sélectionnez un arrondissement.");
       return;
     }
 
-    setErreurRecherche(null);
-    setChargementRecherche(true);
+    setErreurArrondissement(null);
+    setChargementArrondissement(true);
+    setResultatsVille(null);
+    setFiltreActif("arrondissement");
 
     try {
       const donnees = await rechercherPharmaciesDeGarde(arrondissementId);
-      setResultats(donnees);
+      setResultatsArrondissement(donnees);
     } catch (err) {
-      setErreurRecherche(
+      setErreurArrondissement(
         err instanceof ApiError
           ? err.message
           : "Une erreur est survenue. Réessayez.",
       );
-      setResultats(null);
+      setResultatsArrondissement(null);
     } finally {
-      setChargementRecherche(false);
+      setChargementArrondissement(false);
     }
   };
+
+  const gererFiltreVille = async () => {
+    setFiltreActif("ville");
+
+    // Résultats déjà en cache pour cette ville : pas besoin de refaire l'appel.
+    if (resultatsVille !== null || !villeId) return;
+
+    setErreurVille(null);
+    setChargementVille(true);
+
+    try {
+      const donnees = await rechercherPharmaciesParVille(villeId);
+      setResultatsVille(donnees);
+    } catch (err) {
+      setErreurVille(
+        err instanceof ApiError
+          ? err.message
+          : "Une erreur est survenue. Réessayez.",
+      );
+    } finally {
+      setChargementVille(false);
+    }
+  };
+
+  const resultatsAffiches =
+    filtreActif === "ville" ? resultatsVille : resultatsArrondissement;
+  const chargementAffiche =
+    filtreActif === "ville" ? chargementVille : chargementArrondissement;
+  const erreurAffichee =
+    filtreActif === "ville" ? erreurVille : erreurArrondissement;
+
+  const rechercheEffectuee = resultatsArrondissement !== null;
 
   return (
     <section className="padding-section">
@@ -110,9 +167,7 @@ const SearchForm = () => {
             </div>
           </div>
 
-          {/* Form Input */}
           <div className="flex flex-col items-start justify-center gap-4 md:flex-row">
-            {/* City Input */}
             <div className="flex-1 w-full">
               <div className="label-md flex items-center gap-2 mb-1">
                 <span>
@@ -120,27 +175,24 @@ const SearchForm = () => {
                 </span>
                 <span>1. Ville</span>
               </div>
-              <div>
-                <select
-                  className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                  value={villeId ?? ""}
-                  onChange={(e) => gererChangementVille(Number(e.target.value))}
-                  disabled={chargementZones || villes.length === 0}
-                >
-                  {chargementZones && <option>Chargement...</option>}
-                  {!chargementZones && villes.length === 0 && (
-                    <option>Aucune ville disponible</option>
-                  )}
-                  {villes.map((ville) => (
-                    <option key={ville.id} value={ville.id}>
-                      {ville.nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                value={villeId ?? ""}
+                onChange={(e) => gererChangementVille(Number(e.target.value))}
+                disabled={chargementZones || villes.length === 0}
+              >
+                {chargementZones && <option>Chargement...</option>}
+                {!chargementZones && villes.length === 0 && (
+                  <option>Aucune ville disponible</option>
+                )}
+                {villes.map((ville) => (
+                  <option key={ville.id} value={ville.id}>
+                    {ville.nom}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Arrondissement Input */}
             <div className="flex-1 w-full">
               <div className="label-md flex items-center gap-2 mb-1">
                 <span>
@@ -148,28 +200,26 @@ const SearchForm = () => {
                 </span>
                 <span>2. Arrondissement</span>
               </div>
-              <div>
-                <select
-                  className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                  value={arrondissementId ?? ""}
-                  onChange={(e) => setArrondissementId(Number(e.target.value))}
-                  disabled={arrondissements.length === 0}
-                >
-                  <option value="" disabled>
-                    {arrondissements.length === 0
-                      ? "Choisissez d'abord une ville"
-                      : "Choisir..."}
+              <select
+                className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                value={arrondissementId ?? ""}
+                onChange={(e) => setArrondissementId(Number(e.target.value))}
+                disabled={arrondissements.length === 0}
+              >
+                <option value="" disabled>
+                  {arrondissements.length === 0
+                    ? "Choisissez d'abord une ville"
+                    : "Choisir..."}
+                </option>
+                {arrondissements.map((zone) => (
+                  <option
+                    key={zone.arrondissement_id}
+                    value={zone.arrondissement_id!}
+                  >
+                    {zone.arrondissement_nom}
                   </option>
-                  {arrondissements.map((zone) => (
-                    <option
-                      key={zone.arrondissement_id}
-                      value={zone.arrondissement_id!}
-                    >
-                      {zone.arrondissement_nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -195,7 +245,7 @@ const SearchForm = () => {
             type="submit"
             variant="primary"
             icon={<Search />}
-            isLoading={chargementRecherche}
+            isLoading={chargementArrondissement}
           >
             Trouver une pharmacie de garde
           </Button>
@@ -203,27 +253,66 @@ const SearchForm = () => {
           <Button type="button" variant="danger" icon={<Ambulance />}>
             Urgence vitale immédiate : SAMU 112
           </Button>
-
-          {erreurRecherche && (
-            <p
-              role="alert"
-              className="body-sm text-on-error-container bg-error-container px-space-sm py-2 rounded-md"
-            >
-              {erreurRecherche}
-            </p>
-          )}
         </form>
 
-        {/* Résultats */}
-        {resultats && (
+        {/* Barre de filtre + résultats : visible après une première recherche */}
+        {rechercheEffectuee && (
           <div className="flex flex-col gap-4 mt-6">
-            {resultats.length === 0 ? (
-              <p className="body-md text-on-surface-variant text-center">
-                Aucune pharmacie ouverte ou de garde trouvée dans cet
-                arrondissement pour le moment.
+            <div className="flex gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setFiltreActif("arrondissement")}
+                className={`label-md px-4 py-2 rounded-full transition-colors btn-interaction ${
+                  filtreActif === "arrondissement"
+                    ? "bg-emerald-900 text-on-primary"
+                    : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                }`}
+              >
+                Cet arrondissement
+                {resultatsArrondissement &&
+                  ` (${resultatsArrondissement.length})`}
+              </button>
+              <button
+                type="button"
+                onClick={gererFiltreVille}
+                className={`label-md px-4 py-2 rounded-full transition-colors btn-interaction ${
+                  filtreActif === "ville"
+                    ? "bg-emerald-900 text-on-primary"
+                    : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                }`}
+              >
+                Toute la ville
+                {villeSelectionnee ? ` (${villeSelectionnee.nom})` : ""}
+                {resultatsVille && ` — ${resultatsVille.length}`}
+              </button>
+            </div>
+
+            {erreurAffichee && (
+              <p
+                role="alert"
+                className="body-sm text-on-error-container bg-error-container px-space-sm py-2 rounded-md"
+              >
+                {erreurAffichee}
               </p>
-            ) : (
-              resultats.map((pharmacie) => (
+            )}
+
+            {chargementAffiche && (
+              <p className="body-md text-on-surface-variant text-center py-4">
+                Chargement des pharmacies...
+              </p>
+            )}
+
+            {!chargementAffiche &&
+              resultatsAffiches &&
+              resultatsAffiches.length === 0 && (
+                <p className="body-md text-on-surface-variant text-center py-4">
+                  Aucune pharmacie ouverte ou de garde trouvée pour le moment.
+                </p>
+              )}
+
+            {!chargementAffiche &&
+              resultatsAffiches &&
+              resultatsAffiches.map((pharmacie) => (
                 <div
                   key={pharmacie.id}
                   className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm"
@@ -253,8 +342,7 @@ const SearchForm = () => {
                     {pharmacie.telephone_1}
                   </a>
                 </div>
-              ))
-            )}
+              ))}
           </div>
         )}
       </div>

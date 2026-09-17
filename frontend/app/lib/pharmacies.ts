@@ -8,3 +8,6 @@ export const rechercherPharmaciesDeGarde = (arrondissementId: number) =>
   api.get<PharmacieOuverte[]>(
     `/gardes/recherche?arrondissement_id=${arrondissementId}`,
   );
+
+export const rechercherPharmaciesParVille = (villeId: number) =>
+  api.get<PharmacieOuverte[]>(`/gardes/recherche-ville?ville_id=${villeId}`);
