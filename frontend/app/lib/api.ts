@@ -14,11 +14,15 @@ export class ApiError extends Error {
   }
 }
 
-/** Le token est stocké en mémoire + localStorage pour survivre au refresh. */
-let token: string | null = localStorage.getItem("token");
+/** Le token est stocké en mémoire + localStorage pour survivre au refresh.
+ *  `localStorage` n'existe pas côté serveur (SSR) : on s'en protège. */
+let token: string | null =
+  typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
 export const definirToken = (nouveauToken: string | null) => {
   token = nouveauToken;
+  if (typeof window === "undefined") return;
+
   if (nouveauToken) {
     localStorage.setItem("token", nouveauToken);
   } else {
@@ -30,6 +34,8 @@ const request = async <T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> => {
+  // On extrait headers des options pour pouvoir les fusionner proprement :
+  // sans ça, `...options` écraserait l'objet headers composé ici.
   const { headers: headersPerso, ...reste } = options;
 
   const headers: Record<string, string> = {

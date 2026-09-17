@@ -1,6 +1,5 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
-import { Hero, Navbar, SearchForm, Shortcuts } from "../components";
+import { Hero, SearchForm, Shortcuts } from "~/components";
 
 export function meta({}: Route.MetaArgs) {
   return [

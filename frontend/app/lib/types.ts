@@ -63,3 +63,19 @@ export interface Garde {
   date_fin: string;
   type_garde: TypeGarde;
 }
+
+// --- Authentification ---
+
+export type Role = "ADMIN" | "PHARMACIEN";
+
+export interface Utilisateur {
+  id: number;
+  email: string;
+  role: Role;
+  pharmacie_id: number | null;
+}
+
+export interface ReponseLogin {
+  token: string;
+  utilisateur: Utilisateur;
+}
