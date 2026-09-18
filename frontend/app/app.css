@@ -173,6 +173,29 @@ body {
   line-height: 14px;
   letter-spacing: 0.05em;
 }
+@utility btn {
+  @apply inline-flex items-center justify-center font-semibold rounded-btn btn-interaction select-none cursor-pointer;
+  @variant disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+}
+@utility btn-primary {
+  @apply bg-emerald-900 text-on-primary hover:bg-emerald-700/90;
+}
+@utility btn-secondary {
+  @apply bg-secondary text-on-secondary hover:bg-secondary/90;
+}
+@utility btn-outline {
+  @apply border-2 border-emerald-900 text-emerald-900 hover:bg-emerald-900 hover:text-on-primary;
+}
+@utility btn-ghost {
+  @apply text-emerald-900 hover:bg-emerald-200;
+}
+@utility btn-danger {
+  @apply bg-error-container text-on-error-container hover:bg-error-container/50;
+}
 @utility btn-interaction {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   &:active {

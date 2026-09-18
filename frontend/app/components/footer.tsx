@@ -1,4 +1,4 @@
-import logo from "/logo.png";
+import logo from "/logo.jpeg";
 import { Link } from "react-router";
 import { Ambulance, MapPin } from "lucide-react";
 
@@ -14,7 +14,9 @@ const Footer = () => {
             <img
               src={logo}
               alt="Pharmagarde logo"
-              className="w-auto brightness-0 invert"
+              width={220}
+              height={100}
+              className="object-cover rounded-lg"
             />
             <p className="body-sm text-on-primary/80">
               Trouvez en un clic la pharmacie de garde la plus proche, à

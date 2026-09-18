@@ -6,6 +6,7 @@ const VARIANTS = {
   secondary: "bg-secondary text-on-secondary hover:bg-secondary/90",
   outline:
     "border-2 border-emerald-900 text-emerald-900 hover:bg-emerald-900 hover:text-on-primary",
+  disabled: "border-2 border-stone-300 text-stone-500  hover:text-stone-600",
   ghost: "text-emerald-900 hover:bg-emerald-200",
   danger:
     "bg-error-container text-on-error-container hover:bg-error-container/50",

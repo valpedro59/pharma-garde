@@ -1,10 +1,7 @@
 import { query } from "../server/db.js";
 
 /**
- * Colonnes renvoyées pour toute lecture de pharmacie.
- * On évite SELECT * : la colonne `coordonnees` (PostGIS) serait sérialisée
- * en hexadécimal WKB, inexploitable côté client. On projette donc
- * explicitement longitude/latitude via ST_X / ST_Y.
+
  */
 const COLONNES_PHARMACIE = `
   id,

@@ -16,6 +16,8 @@ import {
 } from "~/lib/pharmacies";
 import { ApiError } from "~/lib/api";
 import type { ZoneGeographique, PharmacieOuverte } from "~/lib/types";
+import { Link } from "react-router";
+import PharmacieCard from "./pharmacieCard";
 
 type Filtre = "arrondissement" | "ville";
 
@@ -156,7 +158,7 @@ const SearchForm = () => {
           onSubmit={gererSoumission}
         >
           <div className="flex gap-2 items-center">
-            <span className="bg-emerald-100 p-3 rounded-md">
+            <span className="bg-emerald-50 p-3 rounded-md">
               <Funnel size={24} />
             </span>
             <div>
@@ -176,7 +178,7 @@ const SearchForm = () => {
                 <span>1. Ville</span>
               </div>
               <select
-                className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 value={villeId ?? ""}
                 onChange={(e) => gererChangementVille(Number(e.target.value))}
                 disabled={chargementZones || villes.length === 0}
@@ -201,7 +203,7 @@ const SearchForm = () => {
                 <span>2. Arrondissement</span>
               </div>
               <select
-                className="w-full h-12 pl-space-md pr-10 rounded-btn bg-emerald-50 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 value={arrondissementId ?? ""}
                 onChange={(e) => setArrondissementId(Number(e.target.value))}
                 disabled={arrondissements.length === 0}
@@ -234,7 +236,7 @@ const SearchForm = () => {
 
           <Button
             type="button"
-            variant="outline"
+            variant="disabled"
             icon={<LocateFixed />}
             disabled
           >
@@ -313,35 +315,7 @@ const SearchForm = () => {
             {!chargementAffiche &&
               resultatsAffiches &&
               resultatsAffiches.map((pharmacie) => (
-                <div
-                  key={pharmacie.id}
-                  className="flex flex-col gap-2 bg-white p-4 rounded-xl shadow-sm"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="headline-md">{pharmacie.nom}</h4>
-                    <span
-                      className={`label-sm px-2 py-1 rounded-full whitespace-nowrap ${
-                        pharmacie.statut_actuel === "OUVERTURE_NORMALE"
-                          ? "bg-emerald-100 text-emerald-900"
-                          : "bg-error-container text-on-error-container"
-                      }`}
-                    >
-                      {pharmacie.statut_actuel === "OUVERTURE_NORMALE"
-                        ? "Ouvert"
-                        : "De garde"}
-                    </span>
-                  </div>
-                  <p className="body-sm text-on-surface-variant">
-                    {pharmacie.adresse_textuelle}
-                  </p>
-                  <a
-                    href={`tel:${pharmacie.telephone_1}`}
-                    className="body-md flex items-center gap-2 text-emerald-900 font-semibold"
-                  >
-                    <Phone size={16} />
-                    {pharmacie.telephone_1}
-                  </a>
-                </div>
+                <PharmacieCard key={pharmacie.id} pharmacie={pharmacie} />
               ))}
           </div>
         )}

@@ -10,7 +10,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   return (
-    <div className="relative bg-emerald-50">
+    <div className="relative">
       <Hero />
       <SearchForm />
       <Shortcuts />

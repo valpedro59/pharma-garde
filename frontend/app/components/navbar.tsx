@@ -1,4 +1,4 @@
-import logo from "/logo.png";
+import logo from "/logo.jpeg";
 import { Link } from "react-router";
 
 export default function Navbar() {
@@ -6,7 +6,13 @@ export default function Navbar() {
     <nav className="bg-surface-container-lowest w-full">
       <div className="max-w-7xl flex justify-between items-center px-3 mx-auto">
         <div>
-          <img src={logo} alt="pharma logo" />
+          <img
+            src={logo}
+            width={220}
+            height={100}
+            className="object-cover"
+            alt="pharma logo"
+          />
         </div>
         <div>
           <Link
