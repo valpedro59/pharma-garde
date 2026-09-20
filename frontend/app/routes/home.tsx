@@ -1,19 +1,25 @@
 import type { Route } from "./+types/home";
 import { Hero, SearchForm, Shortcuts } from "~/components";
+import { RechercheProvider } from "~/contexts/RechercheContext";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Pharmagarde" },
+    {
+      name: "description",
+      content: "Trouvez une pharmacie de garde ouverte près de vous.",
+    },
   ];
 }
 
 export default function Home() {
   return (
-    <div className="relative">
-      <Hero />
-      <SearchForm />
-      <Shortcuts />
-    </div>
+    <RechercheProvider>
+      <div className="relative">
+        <Hero />
+        <SearchForm />
+        <Shortcuts />
+      </div>
+    </RechercheProvider>
   );
 }

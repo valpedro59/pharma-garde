@@ -34,7 +34,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="bg-emerald-50 flex items-center justify-center padding-section">
+    <div className="flex items-center justify-center padding-section">
       <div className="w-full max-w-md">
         <form
           className="flex flex-col gap-6 bg-white p-8 rounded-xl shadow-2xl"

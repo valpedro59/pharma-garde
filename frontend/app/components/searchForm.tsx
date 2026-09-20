@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { type FormEvent } from "react";
 import Button from "./button";
 import {
   Ambulance,
@@ -6,155 +6,55 @@ import {
   Funnel,
   LocateFixed,
   Map,
-  Phone,
   Search,
 } from "lucide-react";
-import {
-  recupererGeographie,
-  rechercherPharmaciesDeGarde,
-  rechercherPharmaciesParVille,
-} from "~/lib/pharmacies";
-import { ApiError } from "~/lib/api";
-import type { ZoneGeographique, PharmacieOuverte } from "~/lib/types";
-import { Link } from "react-router";
+import { useRecherche } from "~/contexts/RechercheContext";
 import PharmacieCard from "./pharmacieCard";
 
-type Filtre = "arrondissement" | "ville";
-
 const SearchForm = () => {
-  const [zones, setZones] = useState<ZoneGeographique[]>([]);
-  const [chargementZones, setChargementZones] = useState(true);
-  const [erreurZones, setErreurZones] = useState<string | null>(null);
-
-  const [villeId, setVilleId] = useState<number | null>(null);
-  const [arrondissementId, setArrondissementId] = useState<number | null>(null);
-
-  // Résultats "arrondissement" (recherche principale du formulaire)
-  const [resultatsArrondissement, setResultatsArrondissement] = useState<
-    PharmacieOuverte[] | null
-  >(null);
-  const [chargementArrondissement, setChargementArrondissement] =
-    useState(false);
-  const [erreurArrondissement, setErreurArrondissement] = useState<
-    string | null
-  >(null);
-
-  // Résultats "toute la ville" (chargés à la demande, mis en cache)
-  const [resultatsVille, setResultatsVille] = useState<
-    PharmacieOuverte[] | null
-  >(null);
-  const [chargementVille, setChargementVille] = useState(false);
-  const [erreurVille, setErreurVille] = useState<string | null>(null);
-
-  const [filtreActif, setFiltreActif] = useState<Filtre>("arrondissement");
-
-  useEffect(() => {
-    recupererGeographie()
-      .then((donnees) => {
-        setZones(donnees);
-        if (donnees.length > 0) {
-          setVilleId(donnees[0].ville_id);
-        }
-      })
-      .catch((err) => {
-        setErreurZones(
-          err instanceof ApiError
-            ? err.message
-            : "Impossible de charger les zones géographiques.",
-        );
-      })
-      .finally(() => setChargementZones(false));
-  }, []);
-
-  // Dédoublonnage des villes (pas de `new Map` ici : ce nom est déjà pris
-  // par l'icône lucide `Map` importée plus haut).
-  const villes = zones.reduce<{ id: number; nom: string }[]>((acc, zone) => {
-    if (!acc.some((v) => v.id === zone.ville_id)) {
-      acc.push({ id: zone.ville_id, nom: zone.ville_nom });
-    }
-    return acc;
-  }, []);
-
-  const arrondissements = zones.filter(
-    (zone) => zone.ville_id === villeId && zone.arrondissement_id !== null,
-  );
+  const {
+    chargementZones,
+    erreurZones,
+    villes,
+    villeId,
+    arrondissementId,
+    arrondissementsDeVilleActuelle,
+    filtreActif,
+    aDejaCherche,
+    resultatsArrondissement,
+    chargementArrondissement,
+    erreurArrondissement,
+    resultatsVilleActuelle,
+    chargementVilleActuelle,
+    erreurVille,
+    changerVille,
+    changerArrondissement,
+    rechercherParArrondissement,
+    revenirArrondissement,
+    afficherVille,
+  } = useRecherche();
 
   const villeSelectionnee = villes.find((v) => v.id === villeId);
 
-  const gererChangementVille = (id: number) => {
-    setVilleId(id);
-    setArrondissementId(null);
-    // Un changement de ville invalide les deux jeux de résultats affichés.
-    setResultatsArrondissement(null);
-    setResultatsVille(null);
-    setFiltreActif("arrondissement");
-  };
-
-  const gererSoumission = async (evenement: FormEvent<HTMLFormElement>) => {
+  const gererSoumission = (evenement: FormEvent<HTMLFormElement>) => {
     evenement.preventDefault();
-
-    if (!arrondissementId) {
-      setErreurArrondissement("Sélectionnez un arrondissement.");
-      return;
-    }
-
-    setErreurArrondissement(null);
-    setChargementArrondissement(true);
-    setResultatsVille(null);
-    setFiltreActif("arrondissement");
-
-    try {
-      const donnees = await rechercherPharmaciesDeGarde(arrondissementId);
-      setResultatsArrondissement(donnees);
-    } catch (err) {
-      setErreurArrondissement(
-        err instanceof ApiError
-          ? err.message
-          : "Une erreur est survenue. Réessayez.",
-      );
-      setResultatsArrondissement(null);
-    } finally {
-      setChargementArrondissement(false);
-    }
-  };
-
-  const gererFiltreVille = async () => {
-    setFiltreActif("ville");
-
-    // Résultats déjà en cache pour cette ville : pas besoin de refaire l'appel.
-    if (resultatsVille !== null || !villeId) return;
-
-    setErreurVille(null);
-    setChargementVille(true);
-
-    try {
-      const donnees = await rechercherPharmaciesParVille(villeId);
-      setResultatsVille(donnees);
-    } catch (err) {
-      setErreurVille(
-        err instanceof ApiError
-          ? err.message
-          : "Une erreur est survenue. Réessayez.",
-      );
-    } finally {
-      setChargementVille(false);
-    }
+    rechercherParArrondissement();
   };
 
   const resultatsAffiches =
-    filtreActif === "ville" ? resultatsVille : resultatsArrondissement;
+    filtreActif === "ville" ? resultatsVilleActuelle : resultatsArrondissement;
   const chargementAffiche =
-    filtreActif === "ville" ? chargementVille : chargementArrondissement;
+    filtreActif === "ville"
+      ? chargementVilleActuelle
+      : chargementArrondissement;
   const erreurAffichee =
     filtreActif === "ville" ? erreurVille : erreurArrondissement;
 
-  const rechercheEffectuee = resultatsArrondissement !== null;
-
   return (
     <section className="padding-section">
-      <div className="max-w-7xl flex flex-col gap-3 padding-x padding-y mx-auto">
+      <div className="max-w-7xl flex flex-col gap-3  padding-y mx-auto md:padding-x">
         <form
-          className="flex flex-col bg-white gap-8 p-8 rounded-xl shadow-2xl"
+          className="flex flex-col bg-white gap-8 p-4 rounded-xl shadow-2xl"
           onSubmit={gererSoumission}
         >
           <div className="flex gap-2 items-center">
@@ -178,9 +78,9 @@ const SearchForm = () => {
                 <span>1. Ville</span>
               </div>
               <select
-                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-50 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 value={villeId ?? ""}
-                onChange={(e) => gererChangementVille(Number(e.target.value))}
+                onChange={(e) => changerVille(Number(e.target.value))}
                 disabled={chargementZones || villes.length === 0}
               >
                 {chargementZones && <option>Chargement...</option>}
@@ -203,17 +103,17 @@ const SearchForm = () => {
                 <span>2. Arrondissement</span>
               </div>
               <select
-                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-100 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full h-12 pl-space-md pr-10 rounded-btn border border-stone-300 label-lg appearance-none focus:outline-none focus:bg-emerald-50 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 value={arrondissementId ?? ""}
-                onChange={(e) => setArrondissementId(Number(e.target.value))}
-                disabled={arrondissements.length === 0}
+                onChange={(e) => changerArrondissement(Number(e.target.value))}
+                disabled={arrondissementsDeVilleActuelle.length === 0}
               >
                 <option value="" disabled>
-                  {arrondissements.length === 0
+                  {arrondissementsDeVilleActuelle.length === 0
                     ? "Choisissez d'abord une ville"
                     : "Choisir..."}
                 </option>
-                {arrondissements.map((zone) => (
+                {arrondissementsDeVilleActuelle.map((zone) => (
                   <option
                     key={zone.arrondissement_id}
                     value={zone.arrondissement_id!}
@@ -257,13 +157,17 @@ const SearchForm = () => {
           </Button>
         </form>
 
-        {/* Barre de filtre + résultats : visible après une première recherche */}
-        {rechercheEffectuee && (
-          <div className="flex flex-col gap-4 mt-6">
+        {/* Barre de filtre + résultats : visible après une recherche par
+            arrondissement OU un clic sur "Consulter les gardes" (Shortcuts) */}
+        {aDejaCherche && (
+          <div
+            id="resultats-pharmacies"
+            className="flex flex-col gap-4 mt-6 scroll-mt-24"
+          >
             <div className="flex gap-2 flex-wrap">
               <button
                 type="button"
-                onClick={() => setFiltreActif("arrondissement")}
+                onClick={revenirArrondissement}
                 className={`label-md px-4 py-2 rounded-full transition-colors btn-interaction ${
                   filtreActif === "arrondissement"
                     ? "bg-emerald-900 text-on-primary"
@@ -276,7 +180,7 @@ const SearchForm = () => {
               </button>
               <button
                 type="button"
-                onClick={gererFiltreVille}
+                onClick={() => villeId && afficherVille(villeId)}
                 className={`label-md px-4 py-2 rounded-full transition-colors btn-interaction ${
                   filtreActif === "ville"
                     ? "bg-emerald-900 text-on-primary"
@@ -285,7 +189,8 @@ const SearchForm = () => {
               >
                 Toute la ville
                 {villeSelectionnee ? ` (${villeSelectionnee.nom})` : ""}
-                {resultatsVille && ` — ${resultatsVille.length}`}
+                {resultatsVilleActuelle &&
+                  ` — ${resultatsVilleActuelle.length}`}
               </button>
             </div>
 

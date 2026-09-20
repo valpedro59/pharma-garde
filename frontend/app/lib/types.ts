@@ -7,7 +7,7 @@ export interface CustomButtonProps {
   btnType?: "button" | "submit";
 }
 
-export type TypeGarde = "VOLET_OUVERT" | "VOLET_FERME";
+export type TypeGarde = "JOUR_VOLET_OUVERT" | "NUIT_VOLET_FERME" | "GARDE_24H";
 
 export type StatutActuel =
   | "GARDE_VOLET_OUVERT"
@@ -17,14 +17,13 @@ export type StatutActuel =
 export interface Pharmacie {
   id: number;
   nom: string;
-  arrondissement_id: number | null;
+  adresse_textuelle: string;
   telephone_1: string;
   telephone_2: string | null;
-  adresse_textuelle: string;
+  arrondissement_id: number;
+  google_maps_url: string;
+  iframe_url: string;
   cree_at: string;
-  /** null si la pharmacie n'a pas de coordonnées GPS renseignées */
-  longitude: number | null;
-  latitude: number | null;
 }
 
 /** Réponse de POST et PUT /pharmacies */
@@ -33,18 +32,16 @@ export interface ReponsePharmacie {
   pharmacie: Pharmacie;
 }
 
-/** Résultat de /gardes/recherche et /gardes/proximite */
+/** Résultat de /gardes/recherche */
 export interface PharmacieOuverte {
   id: number;
   nom: string;
   telephone_1: string;
   telephone_2: string | null;
   adresse_textuelle: string;
-  longitude: number | null;
-  latitude: number | null;
+  google_maps_url: string;
+  iframe_url: string;
   statut_actuel: StatutActuel;
-  /** Présent uniquement sur /gardes/proximite */
-  distance_metres?: number;
 }
 
 /** Une ligne de /geographie (jointure villes × arrondissements) */

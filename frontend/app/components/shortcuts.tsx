@@ -1,9 +1,49 @@
+import { useEffect } from "react";
 import Button from "./button";
 import pnr from "/pnr.webp";
 import bzv from "/bzv.webp";
 import { ArrowUpDown } from "lucide-react";
+import { useRecherche } from "~/contexts/RechercheContext";
+
+/** Fait défiler jusqu'au bloc de résultats rendu par SearchForm. */
+const defilerVersResultats = () => {
+  document
+    .getElementById("resultats-pharmacies")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
 
 const Shortcuts = () => {
+  const { villes, obtenirNombreOuvertes, chargerNombreOuvertes, afficherVille } =
+    useRecherche();
+
+  const villePointeNoire = villes.find((v) =>
+    v.nom?.toLowerCase().includes("pointe")
+  );
+  const villeBrazzaville = villes.find((v) =>
+    v.nom?.toLowerCase().includes("brazzaville")
+  );
+
+  // Précharge les deux compteurs dès que la liste des villes est connue,
+  // sans changer l'onglet actif de SearchForm (voir chargerNombreOuvertes).
+  useEffect(() => {
+    if (villePointeNoire) chargerNombreOuvertes(villePointeNoire.id);
+    if (villeBrazzaville) chargerNombreOuvertes(villeBrazzaville.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [villePointeNoire?.id, villeBrazzaville?.id]);
+
+  const consulter = async (villeId: number | undefined) => {
+    if (!villeId) return;
+    await afficherVille(villeId);
+    defilerVersResultats();
+  };
+
+  const nombrePointeNoire = villePointeNoire
+    ? obtenirNombreOuvertes(villePointeNoire.id)
+    : null;
+  const nombreBrazzaville = villeBrazzaville
+    ? obtenirNombreOuvertes(villeBrazzaville.id)
+    : null;
+
   return (
     <section className="bg-white padding-section">
       <div className="max-w-7xl mx-auto flex flex-col gap-3">
@@ -16,9 +56,8 @@ const Shortcuts = () => {
 
         <div className="mb-4">
           <div className="flex flex-col justify-center gap-4 items-center md:flex-row">
-            {/* Card 1 */}
+            {/* Card 1 : Pointe-Noire */}
             <div className="flex flex-1 w-full flex-col  justify-center gap-4 p-4 rounded-xl shadow-sm text-center hover:bg-emerald-50 transition-colors group">
-              {/* top */}
               <div className="flex justify-between items-start">
                 <div className="flex items-center  gap-2">
                   <span className="p-3 bg-slate-100 rounded-md font-semibold">
@@ -29,12 +68,13 @@ const Shortcuts = () => {
                     <p className="body-sm">Capitale economique . 6 arr</p>
                   </div>
                 </div>
-                <div className="p-1 bg-emerald-200 rounded-md label-sm">
-                  nombre de garde
+                <div className="p-1 bg-emerald-200 rounded-md label-sm whitespace-nowrap">
+                  {nombrePointeNoire === null
+                    ? "…"
+                    : `${nombrePointeNoire} ouverte${nombrePointeNoire > 1 ? "s" : ""}`}
                 </div>
               </div>
 
-              {/* middle */}
               <div>
                 <img
                   src={pnr}
@@ -43,12 +83,17 @@ const Shortcuts = () => {
                 />
               </div>
 
-              <Button variant="ghost">Consulter les gardes</Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => consulter(villePointeNoire?.id)}
+              >
+                Consulter les gardes
+              </Button>
             </div>
 
-            {/* Card  2 */}
+            {/* Card 2 : Brazzaville */}
             <div className="flex flex-1 w-full flex-col  justify-center gap-4 p-4 rounded-xl shadow-sm text-center hover:bg-emerald-50  transition-colors group">
-              {/* top */}
               <div className="flex justify-between items-start">
                 <div className="flex items-center  gap-2">
                   <span className="p-3 bg-emerald-100 rounded-md font-semibold">
@@ -59,12 +104,13 @@ const Shortcuts = () => {
                     <p className="body-sm">Capitale politique . 9 arr</p>
                   </div>
                 </div>
-                <div className="p-1 bg-emerald-200 rounded-md label-sm">
-                  nombre de garde
+                <div className="p-1 bg-emerald-200 rounded-md label-sm whitespace-nowrap">
+                  {nombreBrazzaville === null
+                    ? "…"
+                    : `${nombreBrazzaville} ouverte${nombreBrazzaville > 1 ? "s" : ""}`}
                 </div>
               </div>
 
-              {/* middle */}
               <div>
                 <img
                   src={bzv}
@@ -73,7 +119,13 @@ const Shortcuts = () => {
                 />
               </div>
 
-              <Button variant="ghost">Consulter les gardes</Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => consulter(villeBrazzaville?.id)}
+              >
+                Consulter les gardes
+              </Button>
             </div>
           </div>
         </div>

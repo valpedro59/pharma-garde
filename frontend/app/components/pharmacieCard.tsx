@@ -8,10 +8,7 @@ interface PharmacieCardProps {
 
 const PharmacieCard: React.FC<PharmacieCardProps> = ({ pharmacie }) => {
   // Génération dynamique de l'iframe Google Maps si les coordonnées existent
-  const mapEmbedUrl =
-    pharmacie.latitude && pharmacie.longitude
-      ? `https://maps.google.com/maps?q=${pharmacie.latitude},${pharmacie.longitude}&z=15&output=embed`
-      : null;
+  const mapEmbedUrl = pharmacie.iframe_url;
 
   return (
     <div className="flex flex-col md:flex-row gap-4 bg-white p-6 rounded-xl shadow-sm border border-stone-100">
@@ -64,25 +61,23 @@ const PharmacieCard: React.FC<PharmacieCardProps> = ({ pharmacie }) => {
         </div>
 
         {/* Boutons d'action */}
-        <div className="flex flex-wrap gap-3 items-center pt-2">
+        <div className="flex flex-col md:flex-wrap gap-3 items-center pt-2">
           <a
             href={`tel:${pharmacie.telephone_1}`}
-            className="btn btn-ghost body-md flex items-center gap-2 font-semibold text-emerald-900 hover:bg-emerald-50 px-3 py-2 rounded-btn"
+            className="btn btn-ghost  body-md flex items-center gap-2 font-semibold text-emerald-900 hover:bg-emerald-50 px-3 py-2 rounded-btn"
           >
             <Phone size={16} />
             {pharmacie.telephone_1}
           </a>
 
-          {pharmacie.latitude && pharmacie.longitude && (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${pharmacie.latitude},${pharmacie.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary px-4 py-2 body-md font-semibold bg-emerald-900 text-white hover:bg-emerald-800 rounded-btn ml-auto"
-            >
-              Voir localisation
-            </a>
-          )}
+          <a
+            href={pharmacie.google_maps_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full px-4 py-2 body-md font-semibold bg-emerald-900 text-white hover:bg-emerald-800  rounded-btn md:ml-auto"
+          >
+            Voir localisation
+          </a>
         </div>
       </div>
     </div>
