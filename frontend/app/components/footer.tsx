@@ -64,6 +64,17 @@ const Footer = () => {
             l'Ordre National des Pharmaciens du Congo.
           </p>
           <p className="body-sm text-on-primary/70 flex items-center gap-1">
+            <span>Développé par</span>
+            <a
+              href="https://val-pedro.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-on-primary underline decoration-primary/40 decoration-2 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+            >
+              Val Pedro
+            </a>
+          </p>
+          <p className="body-sm text-on-primary/70 flex items-center gap-1">
             <MapPin size={14} />
             Pointe-Noire · Brazzaville
           </p>
