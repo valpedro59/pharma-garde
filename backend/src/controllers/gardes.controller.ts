@@ -1,4 +1,4 @@
-import { db } from "../config/db";
+import { db } from "../config/db.js";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { arrondissements, gardes, pharmacies } from "../models/schema.js";
 
