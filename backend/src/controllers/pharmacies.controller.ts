@@ -1,6 +1,6 @@
 import { db } from "../config/db";
 import { eq } from "drizzle-orm";
-import { arrondissements, pharmacies, villes } from "../models/schema";
+import { arrondissements, pharmacies, villes } from "../models/schema.js";
 
 /**
  * Toutes les pharmacies d'un arrondissement (ouvertes ou non — pas de

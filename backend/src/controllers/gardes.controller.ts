@@ -1,6 +1,6 @@
 import { db } from "../config/db";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
-import { arrondissements, gardes, pharmacies } from "../models/schema";
+import { arrondissements, gardes, pharmacies } from "../models/schema.js";
 
 /**
  * Pharmacies actuellement ouvertes (une garde active couvre l'instant
