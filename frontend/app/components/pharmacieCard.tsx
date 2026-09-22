@@ -76,7 +76,7 @@ const PharmacieCard: React.FC<PharmacieCardProps> = ({ pharmacie }) => {
             rel="noopener noreferrer"
             className="btn btn-primary w-full px-4 py-2 body-md font-semibold bg-emerald-900 text-white hover:bg-emerald-800  rounded-btn md:w-auto md:ml-auto"
           >
-            Voir localisation
+            S'y Rendre
           </a>
         </div>
       </div>
