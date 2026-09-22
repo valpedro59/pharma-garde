@@ -4,7 +4,7 @@ import { RechercheProvider } from "~/contexts/RechercheContext";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Pharmagarde" },
+    { title: "Pharma-garde" },
     {
       name: "description",
       content: "Trouvez une pharmacie de garde ouverte près de vous.",
