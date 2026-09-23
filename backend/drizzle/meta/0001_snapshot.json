@@ -1,0 +1,342 @@
+{
+  "id": "caf33859-01ce-4cab-b3bd-7ebcaa79190c",
+  "prevId": "7352f286-fda3-4c09-af60-8f9492e1402a",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.arrondissements": {
+      "name": "arrondissements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ville_id": {
+          "name": "ville_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "arrondissements_ville_id_villes_id_fk": {
+          "name": "arrondissements_ville_id_villes_id_fk",
+          "tableFrom": "arrondissements",
+          "tableTo": "villes",
+          "columnsFrom": [
+            "ville_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.gardes": {
+      "name": "gardes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pharmacie_id": {
+          "name": "pharmacie_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_debut": {
+          "name": "date_debut",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_fin": {
+          "name": "date_fin",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_garde": {
+          "name": "type_garde",
+          "type": "type_garde",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "gardes_pharmacie_id_pharmacies_id_fk": {
+          "name": "gardes_pharmacie_id_pharmacies_id_fk",
+          "tableFrom": "gardes",
+          "tableTo": "pharmacies",
+          "columnsFrom": [
+            "pharmacie_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pharmacies": {
+      "name": "pharmacies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adresse_textuelle": {
+          "name": "adresse_textuelle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telephone_1": {
+          "name": "telephone_1",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "telephone_2": {
+          "name": "telephone_2",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_maps_url": {
+          "name": "google_maps_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "iframe_url": {
+          "name": "iframe_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arrondissement_id": {
+          "name": "arrondissement_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pharmacies_arrondissement_id_arrondissements_id_fk": {
+          "name": "pharmacies_arrondissement_id_arrondissements_id_fk",
+          "tableFrom": "pharmacies",
+          "tableTo": "arrondissements",
+          "columnsFrom": [
+            "arrondissement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.signalements": {
+      "name": "signalements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pharmacie_id": {
+          "name": "pharmacie_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cree_at": {
+          "name": "cree_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "signalements_pharmacie_id_pharmacies_id_fk": {
+          "name": "signalements_pharmacie_id_pharmacies_id_fk",
+          "tableFrom": "signalements",
+          "tableTo": "pharmacies",
+          "columnsFrom": [
+            "pharmacie_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "users_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.villes": {
+      "name": "villes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nom": {
+          "name": "nom",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "villes_nom_unique": {
+          "name": "villes_nom_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nom"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.type_garde": {
+      "name": "type_garde",
+      "schema": "public",
+      "values": [
+        "JOUR_VOLET_OUVERT",
+        "NUIT_VOLET_FERME",
+        "GARDE_24H"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

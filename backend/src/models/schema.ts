@@ -56,6 +56,15 @@ export const gardes = pgTable("gardes", {
   typeGarde: typeGardeEnum("type_garde").notNull(),
 });
 
+// --- 5. TABLE SIGNALEMENTS (US5 : signalement communautaire de fermeture) ---
+export const signalements = pgTable("signalements", {
+  id: serial("id").primaryKey(),
+  pharmacieId: integer("pharmacie_id")
+    .notNull()
+    .references(() => pharmacies.id, { onDelete: "cascade" }),
+  creeAt: timestamp("cree_at").notNull().defaultNow(),
+});
+
 // --- TABLE USERS (Indépendante, peut être n'importe où après la définition) ---
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -73,7 +82,7 @@ export const villesRelations = relations(villes, ({ many }) => ({
   arrondissements: many(arrondissements),
 }));
 
-// ARRONDISSEMENTS (les DEUX relations au même endroit)
+// ARRONDISSEMENTS (
 export const arrondissementsRelations = relations(
   arrondissements,
   ({ one, many }) => ({
@@ -85,19 +94,27 @@ export const arrondissementsRelations = relations(
   }),
 );
 
-// PHARMACIES (les DEUX relations au même endroit)
+// PHARMACIES
 export const pharmaciesRelations = relations(pharmacies, ({ one, many }) => ({
   arrondissement: one(arrondissements, {
     fields: [pharmacies.arrondissementId],
     references: [arrondissements.id],
   }),
   gardes: many(gardes),
+  signalements: many(signalements),
 }));
 
 // GARDES
 export const gardesRelations = relations(gardes, ({ one }) => ({
   pharmacie: one(pharmacies, {
     fields: [gardes.pharmacieId],
+    references: [pharmacies.id],
+  }),
+}));
+
+export const signalementsRelations = relations(signalements, ({ one }) => ({
+  pharmacie: one(pharmacies, {
+    fields: [signalements.pharmacieId],
     references: [pharmacies.id],
   }),
 }));

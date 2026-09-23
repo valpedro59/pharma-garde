@@ -1,22 +1,19 @@
 import { type MouseEventHandler } from "react";
 
-/* Composant Button */
 export interface CustomButtonProps {
   title: string;
   containerStyles?: string;
   handleClick?: MouseEventHandler<HTMLButtonElement>;
   btnType?: "button" | "submit";
 }
-/* Type de garde  */
+
 export type TypeGarde = "JOUR_VOLET_OUVERT" | "NUIT_VOLET_FERME" | "GARDE_24H";
 
-/* Statut actuel de la pharmacie */
 export type StatutActuel =
   | "GARDE_VOLET_OUVERT"
   | "GARDE_VOLET_FERME"
   | "OUVERTURE_NORMALE";
 
-/* Composant Pharmacie */
 export interface Pharmacie {
   id: number;
   nom: string;
@@ -45,6 +42,9 @@ export interface PharmacieOuverte {
   google_maps_url: string;
   iframe_url: string;
   statut_actuel: StatutActuel;
+  heure_debut: string;
+  heure_fin: string;
+  signalee_fermee: boolean;
 }
 
 /** Une ligne de /geographie (jointure villes × arrondissements) */
@@ -55,7 +55,6 @@ export interface ZoneGeographique {
   arrondissement_nom: string | null;
 }
 
-/* Garde */
 export interface Garde {
   id: number;
   pharmacie_id: number;

@@ -18,3 +18,7 @@ export const rechercherPharmaciesDeGarde = (arrondissementId: number) =>
 // récupérer l'ensemble des pharmacies de garde dans toute la ville
 export const rechercherPharmaciesParVille = (villeId: number) =>
   api.get<PharmacieOuverte[]>(`/gardes/recherche-ville?ville_id=${villeId}`);
+
+// signale une pharmacie de garde en réalité fermée
+export const signalerFermeture = (pharmacieId: number) =>
+  api.post<{ message: string }>(`/pharmacies/${pharmacieId}/signalements`, {});

@@ -1,13 +1,34 @@
 import { db } from "../config/db.js";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
-import { arrondissements, gardes, pharmacies } from "../models/schema.js";
+import {
+  arrondissements,
+  gardes,
+  pharmacies,
+  signalements,
+} from "../models/schema.js";
+import {
+  calculerSeuilTemporel,
+  SEUIL_SIGNALEMENTS,
+} from "../config/signalements.js";
+
+/**
+ * Sous-requête corrélée : vrai si la pharmacie a atteint le seuil de
+ * signalements récents (.
+ */
+const champSignaleeFermee = () => {
+  // On convertit la Date renvoyée par la fonction en chaîne au format ISO
+  const seuilIso = calculerSeuilTemporel().toISOString();
+
+  return sql<boolean>`(
+    SELECT COUNT(*) FROM ${signalements}
+    WHERE ${signalements.pharmacieId} = ${pharmacies.id}
+      AND ${signalements.creeAt} >= ${seuilIso}
+  ) >= ${SEUIL_SIGNALEMENTS}`;
+};
 
 /**
  * Pharmacies actuellement ouvertes (une garde active couvre l'instant
  * présent) dans un arrondissement donné.
- *
- * Pas de table horaires_reguliers dans ce modèle : "ouvert" = il existe
- * une ligne `gardes` telle que date_debut <= now() <= date_fin.
  */
 export const getPharmaciesOuvertesParArrondissement = async (
   arrondissementId: number,
@@ -22,6 +43,9 @@ export const getPharmaciesOuvertesParArrondissement = async (
       google_maps_url: pharmacies.googleMapsUrl,
       iframe_url: pharmacies.iframeUrl,
       statut_actuel: gardes.typeGarde,
+      heure_debut: gardes.dateDebut,
+      heure_fin: gardes.dateFin,
+      signalee_fermee: champSignaleeFermee(),
     })
     .from(pharmacies)
     .innerJoin(
@@ -49,6 +73,9 @@ export const getPharmaciesOuvertesParVille = async (villeId: number) => {
       google_maps_url: pharmacies.googleMapsUrl,
       iframe_url: pharmacies.iframeUrl,
       statut_actuel: gardes.typeGarde,
+      heure_debut: gardes.dateDebut,
+      heure_fin: gardes.dateFin,
+      signalee_fermee: champSignaleeFermee(),
     })
     .from(pharmacies)
     .innerJoin(
