@@ -52,7 +52,7 @@ const SearchForm = () => {
 
   return (
     <section className="padding-section">
-      <div className="max-w-7xl flex flex-col gap-3  padding-y mx-auto md:padding-x">
+      <div className="max-w-7xl flex flex-col gap-3  mx-auto md:padding-x">
         <form
           className="flex flex-col bg-white gap-8 p-4 rounded-xl shadow-2xl"
           onSubmit={gererSoumission}
@@ -69,7 +69,8 @@ const SearchForm = () => {
             </div>
           </div>
 
-          <div className="flex flex-col items-start justify-center gap-4 md:flex-row">
+          <div className="flex flex-col items-end justify-center gap-4 md:flex-row">
+            {/* Ville Input */}
             <div className="flex-1 w-full">
               <div className="label-md flex items-center gap-2 mb-1">
                 <span>
@@ -94,6 +95,8 @@ const SearchForm = () => {
                 ))}
               </select>
             </div>
+
+            {/* Arrondissement Input */}
 
             <div className="flex-1 w-full">
               <div className="label-md flex items-center gap-2 mb-1">
@@ -123,6 +126,19 @@ const SearchForm = () => {
                 ))}
               </select>
             </div>
+
+            <div className="flex-1 w-full">
+              {/* Button Valider */}
+              <Button
+                className="h-12 w-full"
+                type="submit"
+                variant="primary"
+                icon={<Search />}
+                isLoading={chargementArrondissement}
+              >
+                Trouver une pharmacie de garde
+              </Button>
+            </div>
           </div>
 
           {erreurZones && (
@@ -133,24 +149,6 @@ const SearchForm = () => {
               {erreurZones}
             </p>
           )}
-
-          <Button
-            type="button"
-            variant="disabled"
-            icon={<LocateFixed />}
-            disabled
-          >
-            Me geolocaliser automatiquement (bientôt disponible)
-          </Button>
-
-          <Button
-            type="submit"
-            variant="primary"
-            icon={<Search />}
-            isLoading={chargementArrondissement}
-          >
-            Trouver une pharmacie de garde
-          </Button>
 
           <Button type="button" variant="danger" icon={<Ambulance />}>
             Urgence vitale immédiate : SAMU 112
