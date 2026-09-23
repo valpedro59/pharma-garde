@@ -1,28 +1,27 @@
-# Pharma-Garde (Monorepo)
+# 💊 Pharma-Garde (Monorepo)
 
-**Pharma-Garde** est une application web moderne permettant aux citoyens d'identifier, localiser et contacter rapidement les pharmacies de garde (jour et nuit) autour de chez eux.
-
----
-
-## 🎯 Périmètre du Projet
-
-### ✅ INCLUS — Version Initiale (MVP)
-
-- **Tableau des gardes du jour :** Affichage clair des pharmacies de garde selon le type de service (Jour / Nuit / 24h).
-- **Fiche pharmacie détaillée :** Nom, quartier/arrondissement, numéros de téléphone direct, horaires.
-- **Filtrage géographique :** Recherche et filtrage dynamique par ville et arrondissement.
-- **Bouton « Y aller » :** Intégration directe vers **Google Maps** avec géolocalisation et itinéraire.
-- **Signalement communautaire :** Option « Fermé / Erreur » pour permettre aux utilisateurs de rapporter une information obsolète ou inexacte.
+**Pharma-Garde** est une application web moderne conçue pour permettre aux habitants de **Brazzaville** et **Pointe-Noire** d'identifier, localiser et contacter rapidement la pharmacie de garde (jour et nuit) ouverte la plus proche.
 
 ---
 
-### ❌ EXCLUS — Hors Périmètre (Évolutions Futures)
+## 🎯 Périmètre du Projet (Backlog MoSCoW)
 
-- 🛒 Achat et réservation de médicaments en ligne
-- 💳 Paiement mobile (Mobile Money / Carte bancaire)
-- 📦 Gestion et suivi des stocks de médicaments en temps réel
-- 🚚 Service de livraison de médicaments à domicile
-- 📝 Prise de commande avancée et télé-ordonnance
+### ✅ INCLUS — MVP (MUST & SHOULD)
+
+- **Tableau des gardes du jour (US1) :** Affichage clair des pharmacies de garde selon le statut d'ouverture (Jour / Nuit / 24h).
+- **Filtrage géographique (US2) :** Recherche et filtrage dynamique par ville (Brazzaville, Pointe-Noire) et par arrondissement (Bacongo, Moungali, Poto-Poto, etc.).
+- **Appel téléphonique direct (US3) :** Bouton cliquable pour joindre l'officine directement (`tel:`) et vérifier la disponibilité d'un médicament avant de se déplacer.
+- **Accès à l'itinéraire GPS (US4) :** Bouton « Y aller » redirigeant directement vers **Google Maps** avec les coordonnées de la pharmacie.
+- **Signalement communautaire (US5) :** Option « Signaler comme fermée » permettant d'avertir les autres utilisateurs si une pharmacie de garde est exceptionnellement close (affichage d'un badge d'avertissement orange si le seuil de signalements est atteint).
+
+---
+
+### ❌ EXCLUS — Hors Périmètre (COULD & Évolutions Futures)
+
+- 🛒 **US6 — Système de commande et paiement à distance :** Réservation, panier et paiement en ligne (Mobile Money / Carte bancaire).
+- 📦 **Gestion des stocks en temps réel :** Consultation directe de la disponibilité des médicaments.
+- 🚚 **Service de livraison à domicile :** Prise en charge et transport des médicaments.
+- 📝 **Télé-ordonnance et messagerie instantanée.**
 
 ---
 
@@ -35,6 +34,7 @@ Le projet est structuré sous forme de **monorepo** géré avec `pnpm` :
 - **Framework :** React 19 / React Router v8
 - **Build tool :** Vite
 - **Design & Style :** Tailwind CSS v4, Lucide React (Icônes)
+- **Cartographie :** Google Maps Embed / Leaflet
 - **Hébergement :** Netlify
 
 ### ⚙️ Backend (`/backend`)
@@ -52,9 +52,9 @@ Le projet est structuré sous forme de **monorepo** géré avec `pnpm` :
 pharma-garde/
 ├── backend/                  # API REST Express + Drizzle ORM
 │   ├── src/
-│   │   ├── config/           # Configuration BDD & Variables d'env
-│   │   ├── controllers/      # Logique métier
-│   │   ├── db/               # Schémas Drizzle ORM & Migrations
+│   │   ├── config/           # Configuration BDD, variables d'env & signalements.ts
+│   │   ├── controllers/      # Logique métier (gardes.controller.ts, signalements.controller.ts...)
+│   │   ├── models/           # Schémas Drizzle ORM (schema.ts)
 │   │   ├── routes/           # Endpoints de l'API REST
 │   │   └── index.ts          # Point d'entrée du serveur Node.js
 │   ├── package.json
@@ -62,11 +62,11 @@ pharma-garde/
 │
 ├── frontend/                 # Application Web React Router / Vite
 │   ├── app/
-│   │   ├── components/       # Composants UI (cartes, formulaire, navbar...)
+│   │   ├── components/       # Composants UI (PharmacieCard, SearchForm, Navbar...)
 │   │   ├── contexts/         # Gestion d'état global (Auth, Recherche)
 │   │   ├── lib/              # Client API, types et fonctions utilitaires
-│   │   └── routes/           # Vues principales (Accueil, Auth)
-│   ├── public/               # Cartes, images et ressources statiques
+│   │   └── routes/           # Vues principales (Home, Auth)
+│   ├── public/               # Ressources statiques et images
 │   ├── package.json
 │   └── vite.config.ts
 │
@@ -124,7 +124,7 @@ VITE_API_URL=http://localhost:3000
 Depuis la racine du projet :
 
 ```bash
-# Lancer le backend et le frontend simultanément
+# Lancer le backend et le frontend simultanément en dev
 pnpm dev
 
 # Compiler l'ensemble du monorepo pour la production
@@ -146,8 +146,4 @@ pnpm --filter backend drizzle-kit push
 
 ## 👨‍💻 Auteur
 
-Développé et maintenu par **[Val Pedro](https://val-pedro.vercel.app/)**
-
-```
-
-```
+Développé et maintenu par **[Val Pedro](https://val-pedro.vercel.app)**
