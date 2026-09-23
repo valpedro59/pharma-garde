@@ -13,9 +13,9 @@ const VARIANTS = {
 };
 
 const SIZES = {
-  sm: "px-3 py-1.5 text-body-sm min-h-[38px]",
-  md: "px-4 py-2 text-body-md min-h-[44px]", // Idéal pour le touch-friendly sur mobile
-  lg: "px-6 py-3 text-body-lg min-h-[52px]",
+  sm: "px-3 py-1.5 body-sm min-h-[38px]",
+  md: "px-4 py-2 body-md min-h-[44px]", // Idéal pour le touch-friendly sur mobile
+  lg: "px-6 py-3 body-lg min-h-[52px]",
 };
 
 // Extension des propriétés natives du bouton HTML
@@ -52,12 +52,11 @@ export default function Button({
       {isLoading && (
         <span className="mr-2 animate-spin border-2 border-current border-t-transparent rounded-full w-4 height-4" />
       )}
-
-      {/* Icône optionnelle (ex: FontAwesome) */}
-      {!isLoading && icon && <span className="inline-flex mr-2">{icon}</span>}
-
       {/* Texte du bouton */}
       <span>{children}</span>
+
+      {/* Icône optionnelle (ex: FontAwesome) */}
+      {!isLoading && icon && <span className="inline-flex ml-2">{icon}</span>}
     </button>
   );
 }

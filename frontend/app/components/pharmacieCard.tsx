@@ -1,6 +1,7 @@
-import { Phone, MapPin } from "lucide-react";
+import { Phone, MapPin, TriangleAlert, Milestone, Route } from "lucide-react";
 import React from "react";
 import type { PharmacieOuverte } from "~/lib/types";
+import Button from "./button";
 
 interface PharmacieCardProps {
   pharmacie: PharmacieOuverte;
@@ -64,19 +65,29 @@ const PharmacieCard: React.FC<PharmacieCardProps> = ({ pharmacie }) => {
         <div className="flex flex-col md:flex-row gap-3 items-center pt-2">
           <a
             href={`tel:${pharmacie.telephone_1}`}
-            className="btn btn-ghost  body-md flex items-center gap-2 font-semibold text-emerald-900 hover:bg-emerald-50 px-3 py-2 rounded-btn"
+            className="btn w-full btn-ghost  body-md flex items-center gap-2 font-semibold text-emerald-900 md:w-auto hover:bg-emerald-50 px-3 py-2 rounded-btn"
           >
             <Phone size={16} />
             {pharmacie.telephone_1}
           </a>
-
+          <Button
+            className="w-full md:w-auto  md:ml-auto"
+            variant="danger"
+            size="md"
+            icon={<TriangleAlert />}
+          >
+            Signaler comme fermée
+          </Button>
           <a
             href={pharmacie.google_maps_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-primary w-full px-4 py-2 body-md font-semibold bg-emerald-900 text-white hover:bg-emerald-800  rounded-btn md:w-auto md:ml-auto"
+            className="btn btn-primary inline-flex items-center justify-center w-full px-4 py-2 body-md font-semibold text-white hover:bg-emerald-800 min-h-11 rounded-btn md:w-auto md:ml-auto"
           >
-            S'y Rendre
+            S'y Rendre{" "}
+            <span className="ml-2">
+              <Route />
+            </span>
           </a>
         </div>
       </div>
